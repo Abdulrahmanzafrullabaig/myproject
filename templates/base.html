@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DR Prediction System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#1e40af',
+                        'medical-green': '#059669',
+                        'medical-light': '#f0f9ff'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-2">
+                        <i class="fas fa-eye text-medical-blue text-2xl"></i>
+                        <span class="text-xl font-bold text-gray-800">DR Vision</span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    {% if session.user_id %}
+                        <span class="text-gray-600">Welcome, {{ session.full_name or session.username }}</span>
+                        {% if session.role == 'patient' %}
+                            <a href="{{ url_for('dashboard') }}" class="text-medical-blue hover:text-blue-800">Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard') }}" class="text-medical-blue hover:text-blue-800">Dashboard</a>
+                            <a href="{{ url_for('appointments') }}" class="text-medical-blue hover:text-blue-800">Appointments</a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="text-medical-blue hover:text-blue-800">Login</a>
+                        <a href="{{ url_for('register') }}" class="bg-medical-blue text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-16">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    {% for message in messages %}
+                        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4" role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p>&copy; 2024 DR Vision. AI-Powered Diabetic Retinopathy Detection.</p>
+                <p class="text-gray-400 text-sm mt-2">For educational and screening purposes only. Consult a medical professional for diagnosis.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

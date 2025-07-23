@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Register - DR Prediction System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Join our AI-powered diabetic retinopathy screening platform
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" method="POST">
+            <div class="space-y-4">
+                <!-- Role Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">I am a:</label>
+                    <div class="flex space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="role" value="patient" class="mr-2" required onchange="toggleRoleFields()">
+                            <span>Patient</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="role" value="doctor" class="mr-2" required onchange="toggleRoleFields()">
+                            <span>Doctor</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Common Fields -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" name="username" id="username" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+</div>
+
+<div>
+    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+    <input type="email" name="email" id="email" required 
+           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+</div>
+
+<div>
+    <label for="full_name" class="block text-sm font-medium text-gray-700">Full Name</label>
+    <input type="text" name="full_name" id="full_name" required 
+           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+</div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" name="password" id="password" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="tel" name="phone" id="phone" 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+                </div>
+
+                <!-- Patient-specific fields -->
+                <div id="patient-fields" class="space-y-4" style="display: none;">
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
+                        <input type="number" name="age" id="age" min="1" max="120"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+                    </div>
+
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                        <select name="gender" id="gender" 
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Doctor-specific fields -->
+                <div id="doctor-fields" class="space-y-4" style="display: none;">
+                    <div>
+                        <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
+                        <input type="text" name="specialization" id="specialization" 
+                               placeholder="e.g., Ophthalmology, Endocrinology"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" 
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-medical-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-medical-blue">
+                    Register
+                </button>
+            </div>
+
+            <div class="text-center">
+                <p class="text-sm text-gray-600">
+                    Already have an account? 
+                    <a href="{{ url_for('login') }}" class="font-medium text-medical-blue hover:text-blue-500">Sign in</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleRoleFields() {
+    const patientRadio = document.querySelector('input[name="role"][value="patient"]');
+    const doctorRadio = document.querySelector('input[name="role"][value="doctor"]');
+    const patientFields = document.getElementById('patient-fields');
+    const doctorFields = document.getElementById('doctor-fields');
+    
+    if (patientRadio.checked) {
+        patientFields.style.display = 'block';
+        doctorFields.style.display = 'none';
+    } else if (doctorRadio.checked) {
+        patientFields.style.display = 'none';
+        doctorFields.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

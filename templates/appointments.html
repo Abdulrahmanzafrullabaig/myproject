@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments - DR Prediction System{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Patient Appointments</h1>
+        <p class="text-gray-600">Manage your scheduled patient appointments</p>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Scheduled Appointments</h2>
+        
+        {% if appointments %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ appointment[7] }}</div>
+                                <div class="text-sm text-gray-500">{{ appointment[8] }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ appointment[3][:16] if appointment[3] else 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if appointment[4] == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif appointment[4] == 'confirmed' %}bg-green-100 text-green-800
+                                    {% elif appointment[4] == 'completed' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ appointment[4].title() }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                {{ appointment[5][:50] + '...' if appointment[5] and appointment[5]|length > 50 else appointment[5] or 'No notes' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button onclick="updateStatus({{ appointment[0] }}, 'confirmed')" 
+                                        class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-check"></i> Confirm
+                                </button>
+                                <button onclick="updateStatus({{ appointment[0] }}, 'completed')" 
+                                        class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-check-double"></i> Complete
+                                </button>
+                                <button onclick="updateStatus({{ appointment[0] }}, 'cancelled')" 
+                                        class="text-red-600 hover:text-red-900">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-calendar text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No appointments scheduled</h3>
+                <p class="text-gray-500">Patient appointments will appear here when scheduled</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateStatus(appointmentId, status) {
+    if (confirm(`Are you sure you want to mark this appointment as ${status}?`)) {
+        fetch('/update_appointment_status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                appointment_id: appointmentId,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating appointment status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating appointment status');
+        });
+    }
+}
+</script>
+{% endblock %}

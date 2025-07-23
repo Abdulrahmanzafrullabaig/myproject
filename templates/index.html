@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-medical-blue to-blue-600 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold mb-6">AI-Powered Diabetic Retinopathy Detection</h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">Early Detection, Lifelong Vision - Advanced ensemble AI models for accurate diabetic retinopathy screening</p>
+            <!-- Update the CTA buttons section -->
+            <div class="space-x-4">
+                <a href="#about" class="bg-white text-medical-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Learn More</a>
+                {% if not session.user_id %}
+                    <a href="{{ url_for('register') }}" class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">Get Started</a>
+                {% else %}
+                    {% if session.role == 'patient' %}
+                        <a href="{{ url_for('predict') }}" class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">Start Analysis</a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard') }}" class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">View Dashboard</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">About Diabetic Retinopathy</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Diabetic retinopathy is a serious eye condition that affects people with diabetes. 
+                Early detection is crucial for preventing vision loss and maintaining eye health.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center p-6 bg-medical-light rounded-lg">
+                <i class="fas fa-eye text-4xl text-medical-blue mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Early Detection</h3>
+                <p class="text-gray-600">AI-powered screening helps detect DR in its early stages when treatment is most effective.</p>
+            </div>
+            
+            <div class="text-center p-6 bg-medical-light rounded-lg">
+                <i class="fas fa-brain text-4xl text-medical-blue mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Ensemble AI</h3>
+                <p class="text-gray-600">Four advanced deep learning models work together for more accurate and reliable predictions.</p>
+            </div>
+            
+            <div class="text-center p-6 bg-medical-light rounded-lg">
+                <i class="fas fa-file-medical text-4xl text-medical-blue mb-4"></i>
+                <h3 class="text-xl font-semibold mb-2">Detailed Reports</h3>
+                <p class="text-gray-600">Comprehensive PDF reports with explanations and recommendations for patients and doctors.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Advanced Features</h2>
+            <p class="text-lg text-gray-600">Cutting-edge technology for comprehensive diabetic retinopathy analysis</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <i class="fas fa-microscope text-3xl text-medical-green mb-4"></i>
+                <h3 class="font-semibold mb-2">Multi-Model Analysis</h3>
+                <p class="text-sm text-gray-600">ResNet50, VGG16, MobileNet, and EfficientNet working in ensemble</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <i class="fas fa-chart-line text-3xl text-medical-green mb-4"></i>
+                <h3 class="font-semibold mb-2">Explainable AI</h3>
+                <p class="text-sm text-gray-600">Grad-CAM and LIME visualizations show what the AI is focusing on</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <i class="fas fa-users text-3xl text-medical-green mb-4"></i>
+                <h3 class="font-semibold mb-2">Role-Based Access</h3>
+                <p class="text-sm text-gray-600">Separate dashboards for patients and healthcare professionals</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <i class="fas fa-share-alt text-3xl text-medical-green mb-4"></i>
+                <h3 class="font-semibold mb-2">Report Sharing</h3>
+                <p class="text-sm text-gray-600">Easy sharing of analysis results between patients and doctors</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DR Stages Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Diabetic Retinopathy Stages</h2>
+            <p class="text-lg text-gray-600">Understanding the progression of diabetic retinopathy</p>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg">
+                <h3 class="font-semibold text-green-800">Stage 0 - No DR</h3>
+                <p class="text-green-700">No signs of diabetic retinopathy detected. Continue regular monitoring.</p>
+            </div>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
+                <h3 class="font-semibold text-yellow-800">Stage 1 - Mild NPDR</h3>
+                <p class="text-yellow-700">Mild non-proliferative diabetic retinopathy with microaneurysms.</p>
+            </div>
+            
+            <div class="bg-orange-50 border-l-4 border-orange-400 p-6 rounded-r-lg">
+                <h3 class="font-semibold text-orange-800">Stage 2 - Moderate NPDR</h3>
+                <p class="text-orange-700">Moderate non-proliferative diabetic retinopathy with hemorrhages and exudates.</p>
+            </div>
+            
+            <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg">
+                <h3 class="font-semibold text-red-800">Stage 3 - Severe NPDR</h3>
+                <p class="text-red-700">Severe non-proliferative diabetic retinopathy with extensive hemorrhages.</p>
+            </div>
+            
+            <div class="bg-purple-50 border-l-4 border-purple-400 p-6 rounded-r-lg">
+                <h3 class="font-semibold text-purple-800">Stage 4 - Proliferative DR</h3>
+                <p class="text-purple-700">Proliferative diabetic retinopathy with neovascularization. Immediate treatment required.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Update the CTA section at the bottom -->
+{% if not session.user_id %}
+<section class="py-16 bg-medical-blue text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+        <p class="text-xl mb-8">Join thousands of users who trust our AI-powered diabetic retinopathy screening</p>
+        <div class="space-x-4">
+            <a href="{{ url_for('register') }}" class="bg-white text-medical-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Register Now</a>
+            <a href="{{ url_for('login') }}" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-medical-blue transition">Login</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}New Analysis - DR Prediction System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Diabetic Retinopathy Analysis</h1>
+        <p class="text-gray-600 mb-8">Upload a fundus image for AI-powered diabetic retinopathy screening using our ensemble of deep learning models.</p>
+        
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-medical-blue transition">
+                <div id="upload-area">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Upload Fundus Image</h3>
+                    <p class="text-gray-500 mb-4">Drag and drop your image here, or click to browse</p>
+                    <input type="file" name="file" id="file-input" accept=".jpg,.jpeg,.png" required
+                           class="hidden" onchange="handleFileSelect(this)">
+                    <button type="button" onclick="document.getElementById('file-input').click()" 
+                            class="bg-medical-blue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Choose File
+                    </button>
+                </div>
+                
+                <div id="preview-area" class="hidden">
+                    <img id="image-preview" class="max-w-full max-h-64 mx-auto rounded-lg mb-4">
+                    <p id="file-name" class="text-sm text-gray-600 mb-4"></p>
+                    <button type="button" onclick="clearFile()" 
+                            class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-3 mt-1"></i>
+                    <div>
+                        <h4 class="text-sm font-medium text-yellow-800">Important Notes:</h4>
+                        <ul class="text-sm text-yellow-700 mt-1 list-disc list-inside">
+                            <li>Upload high-quality fundus images for best results</li>
+                            <li>Supported formats: JPG, JPEG, PNG</li>
+                            <li>Maximum file size: 16MB</li>
+                            <li>This is a screening tool - consult a doctor for medical advice</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center">
+                <button type="submit" id="analyze-btn"
+                        class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-microscope mr-2"></i>
+                    Analyze Image
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Processing Modal -->
+    <div id="processing-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-medical-blue mx-auto mb-4"></div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Analyzing Image</h3>
+            <p class="text-gray-600">Our AI models are processing your image. This may take a few moments...</p>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-medical-blue h-2 rounded-full animate-pulse" style="width: 60%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleFileSelect(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('image-preview').src = e.target.result;
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('upload-area').classList.add('hidden');
+            document.getElementById('preview-area').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function clearFile() {
+    document.getElementById('file-input').value = '';
+    document.getElementById('upload-area').classList.remove('hidden');
+    document.getElementById('preview-area').classList.add('hidden');
+}
+
+// Show processing modal on form submit
+document.querySelector('form').addEventListener('submit', function() {
+    document.getElementById('processing-modal').classList.remove('hidden');
+    document.getElementById('processing-modal').classList.add('flex');
+});
+
+// Drag and drop functionality
+const uploadArea = document.querySelector('[id="upload-area"]').parentElement;
+uploadArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-medical-blue', 'bg-blue-50');
+});
+
+uploadArea.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-medical-blue', 'bg-blue-50');
+});
+
+uploadArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-medical-blue', 'bg-blue-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('file-input').files = files;
+        handleFileSelect(document.getElementById('file-input'));
+    }
+});
+</script>
+{% endblock %}
