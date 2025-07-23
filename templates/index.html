@@ -1,146 +1,140 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetic Retinopathy Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .bg-hero {
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?medical,technology');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
 
-{% block content %}
-<!-- Hero Section -->
-<section class="bg-gradient-to-r from-medical-blue to-blue-600 text-white py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <h1 class="text-5xl font-bold mb-6">AI-Powered Diabetic Retinopathy Detection</h1>
-            <p class="text-xl mb-8 max-w-3xl mx-auto">Early Detection, Lifelong Vision - Advanced ensemble AI models for accurate diabetic retinopathy screening</p>
-            <!-- Update the CTA buttons section -->
-            <div class="space-x-4">
-                <a href="#about" class="bg-white text-medical-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Learn More</a>
-                {% if not session.user_id %}
-                    <a href="{{ url_for('register') }}" class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">Get Started</a>
-                {% else %}
-                    {% if session.role == 'patient' %}
-                        <a href="{{ url_for('predict') }}" class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">Start Analysis</a>
-                    {% else %}
-                        <a href="{{ url_for('dashboard') }}" class="bg-medical-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">View Dashboard</a>
-                    {% endif %}
-                {% endif %}
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-7">
+                    <div>
+                        <a href="#" class="flex items-center py-4 px-2">
+                            <i class="fas fa-eye text-blue-500 mr-2"></i>
+                            <span class="font-bold text-gray-700 text-lg">DR Detection</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="{{ url_for('login') }}" class="py-2 px-2 font-medium text-gray-500 rounded hover:bg-blue-500 hover:text-white transition duration-300">Login</a>
+                    <a href="{{ url_for('register') }}" class="py-2 px-2 font-medium text-white bg-blue-500 rounded hover:bg-blue-400 transition duration-300">Register</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button class="outline-none mobile-menu-button">
+                        <svg class="w-6 h-6 text-gray-500 hover:text-blue-500"
+                            x-show="!showMenu"
+                            fill="none"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-</section>
-
-<!-- About Section -->
-<section id="about" class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">About Diabetic Retinopathy</h2>
-            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                Diabetic retinopathy is a serious eye condition that affects people with diabetes. 
-                Early detection is crucial for preventing vision loss and maintaining eye health.
-            </p>
+        <div class="hidden mobile-menu">
+            <ul class="">
+                <li><a href="{{ url_for('login') }}" class="block text-sm px-2 py-4 text-white bg-blue-500 font-semibold">Login</a></li>
+                <li><a href="{{ url_for('register') }}" class="block text-sm px-2 py-4 hover:bg-blue-500 transition duration-300">Register</a></li>
+            </ul>
         </div>
+    </nav>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="text-center p-6 bg-medical-light rounded-lg">
-                <i class="fas fa-eye text-4xl text-medical-blue mb-4"></i>
-                <h3 class="text-xl font-semibold mb-2">Early Detection</h3>
-                <p class="text-gray-600">AI-powered screening helps detect DR in its early stages when treatment is most effective.</p>
-            </div>
-            
-            <div class="text-center p-6 bg-medical-light rounded-lg">
-                <i class="fas fa-brain text-4xl text-medical-blue mb-4"></i>
-                <h3 class="text-xl font-semibold mb-2">Ensemble AI</h3>
-                <p class="text-gray-600">Four advanced deep learning models work together for more accurate and reliable predictions.</p>
-            </div>
-            
-            <div class="text-center p-6 bg-medical-light rounded-lg">
-                <i class="fas fa-file-medical text-4xl text-medical-blue mb-4"></i>
-                <h3 class="text-xl font-semibold mb-2">Detailed Reports</h3>
-                <p class="text-gray-600">Comprehensive PDF reports with explanations and recommendations for patients and doctors.</p>
-            </div>
-        </div>
-    </div>
-</section>
+    <!-- Hero Section -->
+    <header class="bg-hero text-white text-center py-20">
+        <h1 class="text-5xl font-bold mb-4">Advanced Diabetic Retinopathy Detection</h1>
+        <p class="text-xl mb-8">Using AI to provide early and accurate diagnosis.</p>
+        <a href="{{ url_for('register') }}" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-400 transition duration-300">Get Started</a>
+    </header>
 
-<!-- Features Section -->
-<section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">Advanced Features</h2>
-            <p class="text-lg text-gray-600">Cutting-edge technology for comprehensive diabetic retinopathy analysis</p>
-        </div>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <i class="fas fa-microscope text-3xl text-medical-green mb-4"></i>
-                <h3 class="font-semibold mb-2">Multi-Model Analysis</h3>
-                <p class="text-sm text-gray-600">ResNet50, VGG16, MobileNet, and EfficientNet working in ensemble</p>
-            </div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <i class="fas fa-chart-line text-3xl text-medical-green mb-4"></i>
-                <h3 class="font-semibold mb-2">Explainable AI</h3>
-                <p class="text-sm text-gray-600">Grad-CAM and LIME visualizations show what the AI is focusing on</p>
-            </div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <i class="fas fa-users text-3xl text-medical-green mb-4"></i>
-                <h3 class="font-semibold mb-2">Role-Based Access</h3>
-                <p class="text-sm text-gray-600">Separate dashboards for patients and healthcare professionals</p>
-            </div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <i class="fas fa-share-alt text-3xl text-medical-green mb-4"></i>
-                <h3 class="font-semibold mb-2">Report Sharing</h3>
-                <p class="text-sm text-gray-600">Easy sharing of analysis results between patients and doctors</p>
+    <!-- Features Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Why Choose Us?</h2>
+            <div class="flex flex-wrap">
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <i class="fas fa-brain text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">State-of-the-Art AI</h3>
+                        <p class="text-gray-600">Our platform uses a powerful ensemble of deep learning models for the highest accuracy.</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <i class="fas fa-file-alt text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Detailed Reports</h3>
+                        <p class="text-gray-600">Receive comprehensive reports with visualizations and explanations.</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 px-4 mb-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <i class="fas fa-user-md text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Doctor-Patient Collaboration</h3>
+                        <p class="text-gray-600">Easily share your results with your doctor for a seamless workflow.</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- DR Stages Section -->
-<section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">Diabetic Retinopathy Stages</h2>
-            <p class="text-lg text-gray-600">Understanding the progression of diabetic retinopathy</p>
-        </div>
-
-        <div class="space-y-6">
-            <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg">
-                <h3 class="font-semibold text-green-800">Stage 0 - No DR</h3>
-                <p class="text-green-700">No signs of diabetic retinopathy detected. Continue regular monitoring.</p>
-            </div>
-            
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
-                <h3 class="font-semibold text-yellow-800">Stage 1 - Mild NPDR</h3>
-                <p class="text-yellow-700">Mild non-proliferative diabetic retinopathy with microaneurysms.</p>
-            </div>
-            
-            <div class="bg-orange-50 border-l-4 border-orange-400 p-6 rounded-r-lg">
-                <h3 class="font-semibold text-orange-800">Stage 2 - Moderate NPDR</h3>
-                <p class="text-orange-700">Moderate non-proliferative diabetic retinopathy with hemorrhages and exudates.</p>
-            </div>
-            
-            <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg">
-                <h3 class="font-semibold text-red-800">Stage 3 - Severe NPDR</h3>
-                <p class="text-red-700">Severe non-proliferative diabetic retinopathy with extensive hemorrhages.</p>
-            </div>
-            
-            <div class="bg-purple-50 border-l-4 border-purple-400 p-6 rounded-r-lg">
-                <h3 class="font-semibold text-purple-800">Stage 4 - Proliferative DR</h3>
-                <p class="text-purple-700">Proliferative diabetic retinopathy with neovascularization. Immediate treatment required.</p>
+    <!-- How it works Section -->
+    <section class="bg-white py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">How It Works</h2>
+            <div class="flex flex-wrap items-center">
+                <div class="w-full md:w-1/2 px-4">
+                    <img src="https://source.unsplash.com/800x600/?retina,eye" alt="How it works" class="rounded-lg shadow-lg">
+                </div>
+                <div class="w-full md:w-1/2 px-4">
+                    <div class="mt-8 md:mt-0">
+                        <div class="mb-4">
+                            <h4 class="text-xl font-bold">1. Upload Image</h4>
+                            <p class="text-gray-600">Upload a fundus image of the retina.</p>
+                        </div>
+                        <div class="mb-4">
+                            <h4 class="text-xl font-bold">2. AI Analysis</h4>
+                            <p class="text-gray-600">Our AI models analyze the image for signs of diabetic retinopathy.</p>
+                        </div>
+                        <div class="mb-4">
+                            <h4 class="text-xl font-bold">3. Get Results</h4>
+                            <p class="text-gray-600">Receive a detailed report with the diagnosis and confidence score.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Update the CTA section at the bottom -->
-{% if not session.user_id %}
-<section class="py-16 bg-medical-blue text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-        <p class="text-xl mb-8">Join thousands of users who trust our AI-powered diabetic retinopathy screening</p>
-        <div class="space-x-4">
-            <a href="{{ url_for('register') }}" class="bg-white text-medical-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Register Now</a>
-            <a href="{{ url_for('login') }}" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-medical-blue transition">Login</a>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Diabetic Retinopathy Detection. All rights reserved.</p>
         </div>
-    </div>
-</section>
-{% endif %}
-{% endblock %}
+    </footer>
+
+    <script>
+        const btn = document.querySelector("button.mobile-menu-button");
+        const menu = document.querySelector(".mobile-menu");
+
+        btn.addEventListener("click", () => {
+            menu.classList.toggle("hidden");
+        });
+    </script>
+</body>
+</html>

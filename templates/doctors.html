@@ -1,100 +1,54 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a Doctor</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
 
-{% block title %}Find Doctors - DR Prediction System{% endblock %}
-
-{% block content %}
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Find Doctors</h1>
-        <p class="text-gray-600">Schedule appointments with qualified ophthalmologists and specialists</p>
-    </div>
-
-    <!-- Doctors List -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Available Doctors</h2>
-        
-        {% if doctors %}
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for doctor in doctors %}
-                <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
-                    <div class="text-center mb-4">
-                        <div class="w-16 h-16 bg-medical-blue rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-user-md text-white text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-800">Dr. {{ doctor[1] }}</h3>
-                        <p class="text-gray-600">{{ doctor[2] }}</p>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-7">
+                    <div>
+                        <a href="{{ url_for('dashboard') }}" class="flex items-center py-4 px-2">
+                            <i class="fas fa-eye text-blue-500 mr-2"></i>
+                            <span class="font-bold text-gray-700 text-lg">DR Detection</span>
+                        </a>
                     </div>
-                    
-                    <button onclick="openAppointmentModal({{ doctor[0] }}, '{{ doctor[1] }}')" 
-                            class="w-full bg-medical-blue text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
-                        <i class="fas fa-calendar mr-2"></i>
-                        Schedule Appointment
-                    </button>
                 </div>
-                {% endfor %}
+                <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('logout') }}" class="py-2 px-2 font-medium text-gray-500 rounded hover:bg-blue-500 hover:text-white transition duration-300">Logout</a>
+                </div>
             </div>
-        {% else %}
-            <div class="text-center py-8">
-                <i class="fas fa-user-md text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No doctors available</h3>
-                <p class="text-gray-500">Please check back later or contact support</p>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Find a Doctor</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for doctor in doctors %}
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ doctor.full_name }}</h2>
+                <p class="text-gray-600 mb-4">{{ doctor.email }}</p>
+                <form method="POST" action="{{ url_for('schedule_appointment') }}">
+                    <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                    <div class="mb-4">
+                        <label for="appointment_date" class="block text-gray-700">Appointment Date</label>
+                        <input type="datetime-local" name="appointment_date" id="appointment_date" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-400 transition duration-300">Schedule Appointment</button>
+                </form>
             </div>
-        {% endif %}
+            {% endfor %}
+        </div>
     </div>
-</div>
 
-<!-- Appointment Modal -->
-<div id="appointmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Schedule Appointment</h3>
-        <form method="POST" action="{{ url_for('schedule_appointment') }}">
-            <input type="hidden" name="doctor_id" id="doctorId">
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
-                <p id="doctorName" class="text-gray-900 font-medium"></p>
-            </div>
-            
-            <div class="mb-4">
-                <label for="appointment_date" class="block text-sm font-medium text-gray-700 mb-2">Appointment Date & Time</label>
-                <input type="datetime-local" name="appointment_date" id="appointment_date" required
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-medical-blue focus:border-medical-blue">
-            </div>
-            
-            <div class="mb-4">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                <textarea name="notes" id="notes" rows="3"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-medical-blue focus:border-medical-blue"
-                          placeholder="Any specific concerns or notes for the doctor..."></textarea>
-            </div>
-            
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeAppointmentModal()" 
-                        class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                <button type="submit" 
-                        class="px-4 py-2 bg-medical-blue text-white rounded-md hover:bg-blue-700">Schedule</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-function openAppointmentModal(doctorId, doctorName) {
-    document.getElementById('doctorId').value = doctorId;
-    document.getElementById('doctorName').textContent = 'Dr. ' + doctorName;
-    document.getElementById('appointmentModal').classList.remove('hidden');
-    document.getElementById('appointmentModal').classList.add('flex');
-    
-    // Set minimum date to today
-    const now = new Date();
-    const minDate = now.toISOString().slice(0, 16);
-    document.getElementById('appointment_date').min = minDate;
-}
-
-function closeAppointmentModal() {
-    document.getElementById('appointmentModal').classList.add('hidden');
-    document.getElementById('appointmentModal').classList.remove('flex');
-}
-</script>
-{% endblock %}
+</body>
+</html>

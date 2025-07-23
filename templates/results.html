@@ -1,203 +1,202 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
 
-{% block title %}Analysis Results - DR Prediction System{% endblock %}
-
-{% block content %}
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Results Header -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Analysis Results</h1>
-        <p class="text-gray-600">AI-powered diabetic retinopathy screening completed</p>
-    </div>
-
-    <!-- Main Results -->
-    <div class="grid lg:grid-cols-2 gap-8 mb-8">
-        <!-- Diagnosis Card -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Final Diagnosis</h2>
-            
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full mb-4
-                    {% if final_prediction == 0 %}bg-green-100
-                    {% elif final_prediction == 1 %}bg-yellow-100
-                    {% elif final_prediction == 2 %}bg-orange-100
-                    {% elif final_prediction == 3 %}bg-red-100
-                    {% else %}bg-purple-100
-                    {% endif %}">
-                    <span class="text-3xl font-bold
-                        {% if final_prediction == 0 %}text-green-600
-                        {% elif final_prediction == 1 %}text-yellow-600
-                        {% elif final_prediction == 2 %}text-orange-600
-                        {% elif final_prediction == 3 %}text-red-600
-                        {% else %}text-purple-600
-                        {% endif %}">
-                        {{ final_prediction }}
-                    </span>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-7">
+                    <div>
+                        <a href="{{ url_for('dashboard') }}" class="flex items-center py-4 px-2">
+                            <i class="fas fa-eye text-blue-500 mr-2"></i>
+                            <span class="font-bold text-gray-700 text-lg">DR Detection</span>
+                        </a>
+                    </div>
                 </div>
-                
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">
-                    {{ dr_stages[final_prediction] }}
-                </h3>
-                
-                <div class="bg-gray-100 rounded-lg p-3 mb-4">
-                    <p class="text-sm font-medium text-gray-700">Ensemble Confidence</p>
-                    <p class="text-2xl font-bold text-medical-blue">
-                        {{ "%.1f"|format(ensemble_confidence * 100) }}%
-                    </p>
+                <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('logout') }}" class="py-2 px-2 font-medium text-gray-500 rounded hover:bg-blue-500 hover:text-white transition duration-300">Logout</a>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <!-- Original Image -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Uploaded Image</h2>
-            <div class="text-center">
-                <img src="data:image/png;base64,{{ original_image }}" 
-                     alt="Fundus Image" class="max-w-full h-64 object-contain mx-auto rounded-lg border">
-                <p class="text-sm text-gray-500 mt-2">Original fundus image</p>
-            </div>
-        </div>
-    </div>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Analysis Results</h1>
 
-    <!-- Model Predictions -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Individual Model Predictions</h2>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {% for model_name, prediction in predictions.items() %}
-            <div class="bg-gray-50 rounded-lg p-4 text-center">
-                <h3 class="font-semibold text-gray-800 mb-2">{{ model_name.upper() }}</h3>
-                {% if 'error' not in prediction %}
-                    <div class="text-2xl font-bold text-medical-blue mb-1">
-                        Stage {{ prediction.predicted_class }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        {{ "%.1f"|format(prediction.confidence * 100) }}% confidence
-                    </div>
-                    
-                    <!-- Probability bars -->
-                    <div class="mt-3 space-y-1">
-                        {% for i in range(5) %}
-                        <div class="flex items-center text-xs">
-                            <span class="w-8">{{ i }}:</span>
-                            <div class="flex-1 bg-gray-200 rounded-full h-2 ml-2">
-                                <div class="bg-medical-blue h-2 rounded-full" 
-                                     style="width: {{ prediction.probabilities[i] * 100 }}%"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2">
+                <!-- Diagnosis -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Diagnosis</h2>
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="w-24 h-24 rounded-full flex items-center justify-center
+                                {% if final_prediction == 0 %} bg-green-100 text-green-600
+                                {% elif final_prediction == 1 %} bg-yellow-100 text-yellow-600
+                                {% elif final_prediction == 2 %} bg-orange-100 text-orange-600
+                                {% elif final_prediction == 3 %} bg-red-100 text-red-600
+                                {% else %} bg-purple-100 text-purple-600
+                                {% endif %}">
+                                <span class="text-4xl font-bold">{{ final_prediction }}</span>
                             </div>
-                            <span class="w-10 text-right ml-1">{{ "%.0f"|format(prediction.probabilities[i] * 100) }}%</span>
                         </div>
-                        {% endfor %}
+                        <div>
+                            <h3 class="text-xl font-bold">{{ dr_stages[final_prediction] }}</h3>
+                            <p class="text-gray-600">Confidence: {{ "%.2f"|format(ensemble_confidence * 100) }}%</p>
+                        </div>
                     </div>
-                {% else %}
-                    <div class="text-red-600">
-                        <i class="fas fa-exclamation-triangle mb-2"></i>
-                        <p class="text-sm">{{ prediction.error }}</p>
-                    </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- Voting Results -->
-        <div class="bg-medical-light border-2 border-medical-blue rounded-lg p-4">
-            <h3 class="font-semibold text-medical-blue mb-2 text-center">ENSEMBLE VOTING RESULTS</h3>
-            <div class="text-center">
-                <div class="text-3xl font-bold text-medical-blue mb-2">
-                    Stage {{ final_prediction }}
                 </div>
-                <div class="text-lg text-gray-700">
-                    {{ "%.1f"|format(ensemble_confidence * 100) }}% confidence
-                </div>
-                {% if vote_counts %}
-                <div class="mt-4 text-sm">
-                    <p class="font-medium">Vote Distribution:</p>
-                    {% for stage, count in vote_counts.items() %}
-                        <span class="inline-block bg-gray-200 rounded px-2 py-1 m-1">
-                            Stage {{ stage }}: {{ count }} vote{{ 's' if count != 1 else '' }}
-                        </span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
 
-    <!-- Explainability -->
-    {% if grad_cam_results or lime_result %}
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">AI Explanation</h2>
-        <p class="text-gray-600 mb-6">These visualizations show which areas of the image the AI models focused on when making their predictions.</p>
-        
-        <div class="grid gap-6">
-            <!-- Grad-CAM Results -->
-            {% if grad_cam_results %}
+                <!-- Gemini Explanation -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-robot text-blue-500 mr-2"></i> Gemini Explanation
+                    </h2>
+                    <div class="prose max-w-none">
+                        <p><strong>Explanation:</strong> {{ gemini_explanation.explanation }}</p>
+                        <p><strong>Suggestions:</strong> {{ gemini_explanation.suggestions }}</p>
+                        <p><strong>Precautions:</strong> {{ gemini_explanation.precautions }}</p>
+                    </div>
+                </div>
+
+                <!-- Explainable AI -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Explainable AI</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="font-bold mb-2">Grad-CAM</h3>
+                            {% for arch, img_b64 in grad_cam_results.items() %}
+                            <div class="mb-4">
+                                <h4 class="font-semibold">{{ arch }}</h4>
+                                <img src="data:image/png;base64,{{ img_b64 }}" alt="Grad-CAM for {{ arch }}" class="rounded-lg shadow-md">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <h3 class="font-bold mb-2">LIME</h3>
+                            {% if lime_result %}
+                            <img src="data:image/png;base64,{{ lime_result }}" alt="LIME Explanation" class="rounded-lg shadow-md">
+                            {% else %}
+                            <p>LIME explanation not available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
             <div>
-                <h3 class="font-semibold text-gray-800 mb-3">Grad-CAM Visualizations</h3>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {% for model_name, grad_cam_b64 in grad_cam_results.items() %}
-                    <div class="text-center">
-                        <h4 class="font-medium text-sm mb-2">{{ model_name.upper() }}</h4>
-                        <img src="data:image/png;base64,{{ grad_cam_b64 }}" 
-                             alt="Grad-CAM for {{ model_name }}" class="w-full rounded-lg border">
-                    </div>
-                    {% endfor %}
+                <!-- Original Image -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Original Image</h2>
+                    <img src="data:image/png;base64,{{ original_image }}" alt="Original Fundus Image" class="rounded-lg shadow-md">
                 </div>
-            </div>
-            {% endif %}
-            
-            <!-- LIME Result -->
-            {% if lime_result %}
-            <div class="text-center">
-                <h3 class="font-semibold text-gray-800 mb-3">LIME Explanation</h3>
-                <img src="data:image/png;base64,{{ lime_result }}" 
-                     alt="LIME Explanation" class="max-w-md mx-auto rounded-lg border">
-                <p class="text-sm text-gray-500 mt-2">Highlights important regions for the prediction</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
 
-    <!-- Actions -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Next Steps</h2>
-        
-        <div class="grid md:grid-cols-3 gap-4">
-            <a href="{{ url_for('download_report', report_id=report_id) }}" 
-               class="bg-medical-blue text-white p-4 rounded-lg text-center hover:bg-blue-700 transition">
-                <i class="fas fa-download text-2xl mb-2"></i>
-                <div class="font-semibold">Download Report</div>
-                <div class="text-sm opacity-90">Get PDF report</div>
-            </a>
-            
-            <a href="{{ url_for('doctors') }}" 
-               class="bg-medical-green text-white p-4 rounded-lg text-center hover:bg-green-700 transition">
-                <i class="fas fa-user-md text-2xl mb-2"></i>
-                <div class="font-semibold">Find Doctor</div>
-                <div class="text-sm opacity-90">Schedule appointment</div>
-            </a>
-            
-            <a href="{{ url_for('predict') }}" 
-               class="bg-gray-600 text-white p-4 rounded-lg text-center hover:bg-gray-700 transition">
-                <i class="fas fa-plus text-2xl mb-2"></i>
-                <div class="font-semibold">New Analysis</div>
-                <div class="text-sm opacity-90">Analyze another image</div>
-            </a>
-        </div>
-        
-        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div class="flex">
-                <i class="fas fa-exclamation-triangle text-yellow-400 mr-3 mt-1"></i>
-                <div>
-                    <h4 class="text-sm font-medium text-yellow-800">Medical Disclaimer</h4>
-                    <p class="text-sm text-yellow-700 mt-1">
-                        This AI screening tool is for educational and preliminary screening purposes only. 
-                        It should not replace professional medical diagnosis. Please consult with a qualified 
-                        ophthalmologist or healthcare provider for proper medical evaluation and treatment.
-                    </p>
+                <!-- Model Confidence -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Model Confidence</h2>
+                    <canvas id="confidenceChart"></canvas>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Actions</h2>
+                    <a href="{{ url_for('download_report', report_id=report_id) }}" class="block w-full text-center bg-blue-500 text-white font-bold py-3 px-4 rounded-full hover:bg-blue-400 transition duration-300 mb-4">
+                        <i class="fas fa-download mr-2"></i> Download Report
+                    </a>
+                    <button onclick="openShareModal()" class="block w-full text-center bg-green-500 text-white font-bold py-3 px-4 rounded-full hover:bg-green-400 transition duration-300">
+                        <i class="fas fa-share-alt mr-2"></i> Share Report
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Share Report with Doctor</h3>
+            <form id="shareForm">
+                <input type="hidden" name="report_id" value="{{ report_id }}">
+                <div class="mb-4">
+                    <label for="doctor_email" class="block text-sm font-medium text-gray-700 mb-2">Doctor's Email</label>
+                    <input type="email" name="doctor_email" id="doctor_email" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="doctor@example.com">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeShareModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">Share Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chartData = {{ chart_data|tojson }};
+        const ctx = document.getElementById('confidenceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Confidence',
+                    data: chartData.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1.0
+                    }
+                }
+            }
+        });
+
+        function openShareModal() {
+            document.getElementById('shareModal').classList.remove('hidden');
+            document.getElementById('shareModal').classList.add('flex');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.add('hidden');
+            document.getElementById('shareModal').classList.remove('flex');
+        }
+
+        document.getElementById('shareForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/share_report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Report shared successfully!');
+                closeShareModal();
+            } else {
+                alert(`Failed to share report: ${result.error}`);
+            }
+        });
+    </script>
+</body>
+</html>
