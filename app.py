@@ -32,10 +32,18 @@ import timm  # For mobilenetv4_conv_large
 from typing import Tuple, Optional, Dict, Any
 import torch.nn as nn
 import logging
+import google.generativeai as genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Gemini API Configuration
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'YOUR_GEMINI_API_KEY')
+if GEMINI_API_KEY == 'YOUR_GEMINI_API_KEY':
+    logger.warning("Gemini API key not found. Please set the GEMINI_API_KEY environment variable.")
+else:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -166,9 +174,11 @@ def initialize_model(arch: str) -> Tuple[nn.Module, nn.Module]:
 
 def load_model(arch: str, path: str) -> Tuple[Optional[nn.Module], Optional[nn.Module], Optional[str]]:
     """Load model weights from file with error handling"""
-    if not os.path.exists(path):
-        logger.error(f"Model file not found at {path}")
-        return None, None, f"Model file not found at {path}"
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        logger.warning(f"Model file not found or empty at {path}. Initializing with random weights.")
+        model, final_conv_layer = initialize_model(arch)
+        model.to(device).eval()
+        return model, final_conv_layer, None
 
     try:
         model, final_conv_layer = initialize_model(arch)
@@ -395,6 +405,42 @@ def generate_pdf_report(report_data: Dict, output_path: str):
         logger.error(f"PDF report generation failed: {e}")
         raise
 
+def get_gemini_explanation(stage: int) -> Dict[str, str]:
+    """Get explanation from Gemini API"""
+    if GEMINI_API_KEY == 'YOUR_GEMINI_API_KEY':
+        return {
+            "explanation": "Gemini API key not configured. Please contact the administrator.",
+            "suggestions": "N/A",
+            "precautions": "N/A"
+        }
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        prompt = f"""
+        Provide a clear, concise explanation for a patient who has been diagnosed with
+        Diabetic Retinopathy Stage {stage} ({DR_STAGES[stage]}).
+        The explanation should be easy to understand for a non-medical person.
+        Also provide a list of suggestions and precautions.
+        Format the output as a JSON object with three keys: "explanation", "suggestions", and "precautions".
+        """
+        response = model.generate_content(prompt)
+        # Handle potential API errors or unexpected response formats
+        if response and response.text:
+            # Clean the response to ensure it's valid JSON
+            cleaned_text = response.text.strip()
+            if cleaned_text.startswith("```json"):
+                cleaned_text = cleaned_text[7:-3].strip()
+            return json.loads(cleaned_text)
+        else:
+            raise ValueError("Empty or invalid response from Gemini API")
+    except Exception as e:
+        logger.error(f"Gemini API error: {e}")
+        return {
+            "explanation": f"Error generating explanation: {e}",
+            "suggestions": "Please consult your doctor for recommendations.",
+            "precautions": "Please consult your doctor for recommendations."
+        }
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -536,6 +582,8 @@ def predict():
                     'data': [predictions[arch]['confidence'] for arch in predictions if 'error' not in predictions[arch]]
                 }
                 
+                gemini_explanation = get_gemini_explanation(final_prediction)
+
                 return render_template('results.html',
                                      predictions=predictions,
                                      final_prediction=final_prediction,
@@ -546,7 +594,8 @@ def predict():
                                      lime_result=lime_b64,
                                      original_image=original_b64,
                                      report_id=report_id,
-                                     chart_data=chart_data)
+                                     chart_data=chart_data,
+                                     gemini_explanation=gemini_explanation)
             except Exception as e:
                 logger.error(f"Prediction error: {e}")
                 flash('Error processing image. Please try again.', 'error')
@@ -554,6 +603,34 @@ def predict():
         else:
             flash('Please upload a valid image file (PNG, JPG, JPEG)!', 'error')
     return render_template('predict.html')
+
+@app.route('/share_report', methods=['POST'])
+@login_required
+def share_report():
+    try:
+        data = request.get_json()
+        report_id = data['report_id']
+        doctor_email = data['doctor_email']
+
+        conn = sqlite3.connect('diabetic_retinopathy.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM reports WHERE id = ? AND user_id = ?', (report_id, session['user_id']))
+        report = c.fetchone()
+        conn.close()
+
+        if not report:
+            return jsonify({'success': False, 'error': 'Report not found'})
+
+        # This is a placeholder for a real email sending implementation
+        logger.info(f"Sharing report {report_id} with {doctor_email}")
+        # In a real application, you would use a library like smtplib or a service like SendGrid
+        # to send an email with a link to the report.
+        # For this example, we'll just log the action.
+
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error sharing report: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/download_report/<int:report_id>')
 @login_required

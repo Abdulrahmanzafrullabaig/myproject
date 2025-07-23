@@ -1,223 +1,97 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
 
-{% block title %}Doctor Dashboard - DR Prediction System{% endblock %}
-
-{% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Welcome Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Dr. {{ current_user.name }}</h1>
-        <p class="text-gray-600">{{ current_user.specialization if current_user.specialization else 'Medical Professional' }}</p>
-    </div>
-
-    <!-- Statistics -->
-    <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-medical-blue text-white p-6 rounded-lg">
-            <i class="fas fa-users text-3xl mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Total Patients</h3>
-            <p class="text-3xl font-bold">{{ total_patients }}</p>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-7">
+                    <div>
+                        <a href="{{ url_for('dashboard') }}" class="flex items-center py-4 px-2">
+                            <i class="fas fa-eye text-blue-500 mr-2"></i>
+                            <span class="font-bold text-gray-700 text-lg">DR Detection</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-gray-500">Welcome, Dr. {{ session.full_name }}</span>
+                    <a href="{{ url_for('logout') }}" class="py-2 px-2 font-medium text-gray-500 rounded hover:bg-blue-500 hover:text-white transition duration-300">Logout</a>
+                </div>
+            </div>
         </div>
-        
-        <div class="bg-medical-green text-white p-6 rounded-lg">
-            <i class="fas fa-file-medical text-3xl mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Shared Reports</h3>
-            <p class="text-3xl font-bold">{{ shared_predictions|length }}</p>
-        </div>
-        
-        <div class="bg-purple-600 text-white p-6 rounded-lg">
-            <i class="fas fa-eye text-3xl mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Today's Reviews</h3>
-            <p class="text-3xl font-bold">{{ shared_predictions|selectattr('4', 'match', '.*' + moment().format('YYYY-MM-DD') + '.*')|list|length if shared_predictions else 0 }}</p>
-        </div>
-    </div>
+    </nav>
 
-    <!-- Patient Reports -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Patient Reports</h2>
-        
-        {% if shared_predictions %}
+    <!-- Dashboard Content -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Doctor Dashboard</h1>
+
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Appointments</h2>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="w-full text-left">
+                    <thead>
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DR Stage</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Confidence</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="py-2 px-4 border-b">Date</th>
+                            <th class="py-2 px-4 border-b">Patient</th>
+                            <th class="py-2 px-4 border-b">Status</th>
+                            <th class="py-2 px-4 border-b">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for prediction in shared_predictions %}
+                    <tbody>
+                        {% for appointment in appointments %}
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ prediction[7] }}</div>
-                                <div class="text-sm text-gray-500">{{ prediction[8] }}</div>
+                            <td class="py-2 px-4 border-b">{{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="py-2 px-4 border-b">{{ appointment.patient_name }}</td>
+                            <td class="py-2 px-4 border-b">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {% if appointment.status == 'pending' %} bg-yellow-100 text-yellow-800
+                                    {% elif appointment.status == 'confirmed' %} bg-green-100 text-green-800
+                                    {% else %} bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ appointment.status }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ prediction[4][:19] if prediction[4] else 'N/A' }}
+                            <td class="py-2 px-4 border-b">
+                                <button onclick="updateStatus('{{ appointment.id }}', 'confirmed')" class="text-green-500 hover:underline mr-2">Confirm</button>
+                                <button onclick="updateStatus('{{ appointment.id }}', 'cancelled')" class="text-red-500 hover:underline">Cancel</button>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {% set result = prediction[3]|from_json if prediction[3] else {} %}
-                                {% if result and result.ensemble %}
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        {% if result.ensemble.predicted_class == 0 %}bg-green-100 text-green-800
-                                        {% elif result.ensemble.predicted_class == 1 %}bg-yellow-100 text-yellow-800
-                                        {% elif result.ensemble.predicted_class == 2 %}bg-orange-100 text-orange-800
-                                        {% elif result.ensemble.predicted_class == 3 %}bg-red-100 text-red-800
-                                        {% else %}bg-purple-100 text-purple-800
-                                        {% endif %}">
-                                        Stage {{ result.ensemble.predicted_class }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-gray-500">Processing...</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {% if result and result.ensemble %}
-                                    {{ "%.1f"|format(result.ensemble.confidence * 100) }}%
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <button onclick="viewReport({{ prediction[0] }}, '{{ prediction[7] }}', {{ prediction[3]|tojson|safe }})" 
-                                        class="text-medical-blue hover:text-blue-900">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                                <a href="{{ url_for('download_report', prediction_id=prediction[0]) }}" 
-                                   class="text-medical-green hover:text-green-900">
-                                    <i class="fas fa-download"></i> Download
-                                </a>
-                                <button onclick="addComment({{ prediction[0] }})" 
-                                        class="text-purple-600 hover:text-purple-900">
-                                    <i class="fas fa-comment"></i> Comment
-                                </button>
-                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">No appointments found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        {% else %}
-            <div class="text-center py-8">
-                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No shared reports</h3>
-                <p class="text-gray-500">Patient reports will appear here when shared with you</p>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- View Report Modal -->
-<div id="viewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-screen overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium text-gray-900">Patient Report Details</h3>
-            <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <div id="reportContent">
-            <!-- Report content will be loaded here -->
         </div>
     </div>
-</div>
 
-<!-- Comment Modal -->
-<div id="commentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Add Doctor's Comment</h3>
-        <form method="POST" action="{{ url_for('add_comment') }}">
-            <input type="hidden" name="prediction_id" id="commentPredictionId">
-            <div class="mb-4">
-                <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">Comment</label>
-                <textarea name="comment" id="comment" rows="4" required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-medical-blue focus:border-medical-blue"
-                          placeholder="Enter your professional comments and recommendations..."></textarea>
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeCommentModal()" 
-                        class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                <button type="submit" 
-                        class="px-4 py-2 bg-medical-blue text-white rounded-md hover:bg-blue-700">Add Comment</button>
-            </div>
-        </form>
-    </div>
-</div>
+    <script>
+        async function updateStatus(appointmentId, status) {
+            const response = await fetch('/update_appointment_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ appointment_id: appointmentId, status: status }),
+            });
+            const result = await response.json();
+            if (result.success) {
+                location.reload();
+            } else {
+                alert('Failed to update status.');
+            }
+        }
+    </script>
 
-<script>
-function viewReport(predictionId, patientName, resultData) {
-    const modal = document.getElementById('viewModal');
-    const content = document.getElementById('reportContent');
-    
-    let result;
-    try {
-        result = typeof resultData === 'string' ? JSON.parse(resultData) : resultData;
-    } catch (e) {
-        result = {};
-    }
-    
-    const drStage = result.dr_stage || {};
-    const ensemble = result.ensemble || {};
-    
-    content.innerHTML = `
-        <div class="space-y-6">
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="font-semibold text-gray-800 mb-2">Patient: ${patientName}</h4>
-                <p class="text-sm text-gray-600">Report ID: ${predictionId}</p>
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-3">Diagnosis</h4>
-                    <div class="space-y-2">
-                        <p><strong>Stage:</strong> ${drStage.name || 'N/A'}</p>
-                        <p><strong>Confidence:</strong> ${ensemble.confidence ? (ensemble.confidence * 100).toFixed(1) + '%' : 'N/A'}</p>
-                        <p><strong>Description:</strong> ${drStage.description || 'N/A'}</p>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-3">Recommendations</h4>
-                    <p class="text-sm">${drStage.advice || 'No specific recommendations available.'}</p>
-                </div>
-            </div>
-            
-            ${result.individual_models ? `
-            <div>
-                <h4 class="font-semibold text-gray-800 mb-3">Model Predictions</h4>
-                <div class="grid grid-cols-2 gap-4">
-                    ${Object.entries(result.individual_models).map(([model, data]) => `
-                        <div class="bg-gray-50 p-3 rounded">
-                            <p class="font-medium">${model.toUpperCase()}</p>
-                            <p class="text-sm">Stage ${data.predicted_class} (${(data.confidence * 100).toFixed(1)}%)</p>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            ` : ''}
-        </div>
-    `;
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
-
-function closeViewModal() {
-    document.getElementById('viewModal').classList.add('hidden');
-    document.getElementById('viewModal').classList.remove('flex');
-}
-
-function addComment(predictionId) {
-    document.getElementById('commentPredictionId').value = predictionId;
-    document.getElementById('commentModal').classList.remove('hidden');
-    document.getElementById('commentModal').classList.add('flex');
-}
-
-function closeCommentModal() {
-    document.getElementById('commentModal').classList.add('hidden');
-    document.getElementById('commentModal').classList.remove('flex');
-}
-</script>
-{% endblock %}
+</body>
+</html>
